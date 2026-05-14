@@ -1,0 +1,103 @@
+openapi: 3.1.0
+info:
+  title: OpenMythos API
+  version: 0.1.0
+  description: Generate text with an OpenMythos server.
+servers:
+  - url: https://your-domain.example.com
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Check API health
+      responses:
+        "200":
+          description: API status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  model_variant:
+                    type: string
+                  device:
+                    type: string
+                  auth_enabled:
+                    type: boolean
+  /generate:
+    post:
+      operationId: generateWithOpenMythos
+      summary: Generate text using OpenMythos
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+              properties:
+                prompt:
+                  type: string
+                  description: User prompt to send to OpenMythos.
+                max_new_tokens:
+                  type: integer
+                  minimum: 1
+                  maximum: 4096
+                  default: 64
+                n_loops:
+                  type: integer
+                  minimum: 1
+                  maximum: 128
+                  default: 4
+                temperature:
+                  type: number
+                  minimum: 0
+                  maximum: 5
+                  default: 0.8
+                top_k:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000
+                  nullable: true
+                  default: 40
+                return_full_text:
+                  type: boolean
+                  default: false
+      responses:
+        "200":
+          description: Generated text
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string
+                  full_text:
+                    type: string
+                  input_tokens:
+                    type: integer
+                  output_tokens:
+                    type: integer
+                  model_variant:
+                    type: string
+                  device:
+                    type: string
+                  warning:
+                    type:
+                      - string
+                      - "null"
+        "401":
+          description: Missing or invalid Bearer token
+        "500":
+          description: Generation failed
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
